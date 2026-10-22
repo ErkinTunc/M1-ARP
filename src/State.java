@@ -31,4 +31,8 @@ public class State {
         }
         return count == 1;
     }
+
+    public void colorCase(int color, int posX, int posY) {
+        grid[posX][posY] = color;
+    }
 }
