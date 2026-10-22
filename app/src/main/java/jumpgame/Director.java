@@ -1,3 +1,5 @@
+package jumpgame;
+
 public class Director {
     private State currentState;
     private MemoryOfActions memory;

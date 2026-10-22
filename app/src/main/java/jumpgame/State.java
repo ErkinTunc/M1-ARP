@@ -1,3 +1,5 @@
+package jumpgame;
+
 /**
  * This class represents a state of the grid in the game. 
  * It contains a 2D array representing the grid and provides a method to check if the state is final,

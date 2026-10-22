@@ -1,3 +1,5 @@
+package jumpgame;
+
 /**
  * Action
  * Represents an action performed on the grid, including the direction of movement, the cell number, the initial position of the cell before the action, and the color.
