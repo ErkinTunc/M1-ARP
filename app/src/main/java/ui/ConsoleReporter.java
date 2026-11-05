@@ -3,9 +3,8 @@ package ui;
 import java.io.PrintStream;
 import java.util.Objects;
 
-/** Visual output only. All ANSI sequences and terminal layout live here. */
+/** Handles console text, colors, and board display. */
 public final class ConsoleReporter {
-    // Half-Life-inspired orange: #FF6600.
     private static final String ORANGE = "\u001B[38;2;255;102;0m";
     private static final String WHITE = "\u001B[1;37m";
     private static final String GREY = "\u001B[90m";
@@ -28,6 +27,7 @@ public final class ConsoleReporter {
         this.out = Objects.requireNonNull(out, "out");
         this.ansiSupported = ansiSupported;
         this.colorsEnabled = ansiSupported;
+
         int columns = Math.max(30, terminalColumns);
         this.width = Math.min(MAX_CONTENT_WIDTH, columns - 4);
         this.indent = " ".repeat((columns - width) / 2);
@@ -43,12 +43,11 @@ public final class ConsoleReporter {
     }
 
     public void banner() {
-        ruleLine();
+        line("=".repeat(width), ORANGE);
         center("JUMP GAME | PROBLEM SOLVING", ORANGE);
-        ruleLine();
+        line("=".repeat(width), ORANGE);
     }
 
-    /** Fixed header shown on EVERY screen, including setup and options. */
     public void status(String boardSize, String colors, String mode) {
         out.println();
         line("ACTIVE RULE  : Jump over another color into an empty cell", ORANGE);
@@ -90,7 +89,6 @@ public final class ConsoleReporter {
         for (int[] row : board) {
             out.print(indent);
             for (int value : row) {
-                // Every cell is exactly FIVE visible columns plus one gap.
                 String cell = value == 0 ? "  .  " : String.format(" %2d  ", value);
                 String color = value == 0 ? GREY : CELL_COLORS[(value - 1) % CELL_COLORS.length];
                 out.print(style(cell, color) + " ");
@@ -108,10 +106,6 @@ public final class ConsoleReporter {
         colorsEnabled = enabled && ansiSupported;
     }
 
-    private void ruleLine() {
-        line("=".repeat(width), ORANGE);
-    }
-
     private void center(String text, String color) {
         int spaces = Math.max(0, (width - text.length()) / 2);
         line(" ".repeat(spaces) + text, color);
@@ -122,23 +116,33 @@ public final class ConsoleReporter {
     }
 
     private String style(String text, String color) {
-        return colorsEnabled && color != null ? color + text + RESET : text;
+        if (!colorsEnabled || color == null) {
+            return text;
+        }
+        return color + text + RESET;
     }
 
     private static int terminalColumns() {
         try {
             String value = System.getenv("COLUMNS");
-            if (value != null) return Integer.parseInt(value);
+            if (value != null) {
+                return Integer.parseInt(value);
+            }
         } catch (NumberFormatException ignored) {
-            // Use terminal-independent default.
+            // Use the default width if COLUMNS is invalid.
         }
         return 100;
     }
 
     private static boolean supportsAnsi() {
         String mode = System.getenv("JUMP_COLOR");
-        if ("always".equalsIgnoreCase(mode)) return true;
-        if ("never".equalsIgnoreCase(mode) || System.getenv().containsKey("NO_COLOR")) return false;
+        if ("always".equalsIgnoreCase(mode)) {
+            return true;
+        }
+        if ("never".equalsIgnoreCase(mode) || System.getenv().containsKey("NO_COLOR")) {
+            return false;
+        }
+
         String term = System.getenv("TERM");
         return System.console() != null
                 || System.getenv().containsKey("WT_SESSION")
