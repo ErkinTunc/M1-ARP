@@ -8,7 +8,7 @@ import java.util.List;
  */
 public class State {
 
-    private int [][] grid;
+    private final int [][] grid;
 
 
     public State(int [][] grid) {
@@ -24,9 +24,9 @@ public class State {
 
         int count = 0;
 
-        for(int i = 0; i < grid.length; i++) {
-            for(int j = 0; j < grid[i].length; j++) {
-                if(grid[i][j] != 0){
+        for (int[] grid1 : grid) {
+            for (int j = 0; j < grid1.length; j++) {
+                if (grid1[j] != 0) {
                     count++;
                 }
             }
@@ -43,9 +43,9 @@ public class State {
     }
 
     public void displayGrid() {
-        for(int i = 0; i < grid.length; i++) {
-            for(int j = 0; j < grid[i].length; j++) {
-                System.out.print(grid[i][j] + " ");
+        for (int[] grid1 : grid) {
+            for (int j = 0; j < grid1.length; j++) {
+                System.out.print(grid1[j] + " ");
             }
             System.out.println();
         }
@@ -70,19 +70,13 @@ public class State {
                     int stepX = 0;
                     int stepY = 0;
                     switch(direction) {
-                        case Up:
-                            stepX = -1;
-                            break;
-                        case Down:
-                            stepX = 1; 
-                            break;
-                        case Left:
-                            stepY = -1;
-                            break;
-                        case Right:
-                            stepY = 1; 
-                            break;
+                        case Up -> stepX = -1;
+                        case Down -> stepX = 1;
+                        case Left -> stepY = -1;
+                        case Right -> stepY = 1;
                     }
+
+                    
                     int currentX = x+stepX;
                     int currentY = y+stepY;
                     int jumpedCount = 0;

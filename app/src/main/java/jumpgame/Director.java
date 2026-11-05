@@ -2,8 +2,8 @@ package jumpgame;
 import java.util.List;
 
 public class Director {
-    private State currentState;
-    private MemoryOfActions memory;
+    private final State currentState;
+    private final MemoryOfActions memory;
 
     public Director(State initialState) {
         this.currentState = initialState;
@@ -45,14 +45,14 @@ public class Director {
                 break;
         }
 
-        for (int i = 1; i <= action.getJumpedCount(); i++) {
+        for (int i = 1; i <= distance; i++) {
             int newX = pos[0] + stepX * i;
             int newY = pos[1] + stepY * i;
             currentState.colorCase(0, newX, newY); // Set the jumped cells to empty (0)
         }
 
-        int targetX = pos[0] + stepX * (action.getJumpedCount() + 1);
-        int targetY = pos[1] + stepY * (action.getJumpedCount() + 1);
+        int targetX = pos[0] + stepX * (distance + 1);
+        int targetY = pos[1] + stepY * (distance + 1);
         currentState.colorCase(action.getCellColor(), targetX, targetY);
     }
         
@@ -120,28 +120,54 @@ public class Director {
 
 
 
-
+    /**
+     * Runs the game by attempting to solve it. If a solution is found, it displays the final state and the sequence of actions taken. If no solution exists, it indicates that as well.
+     * The method uses a recursive backtracking approach to explore all possible actions from the current state.
+     * If a final state is reached, the method returns true. If no solution is found, it backtracks and tries other actions.
+     */
     public void run() {
-
-        while (!currentState.isFinal()) {
-            // Display the current state of the grid
-            currentState.displayGrid();
-
-            // Get possible actions from the current state
-            List<Action> possibleActions = currentState.getPossibleActions();
-
-            if (possibleActions.isEmpty() ) {
-                System.out.println("No more possible actions. Game over!");
-                break;
-            }
-
-            // For demonstration, we will just perform the first possible action
-            Action actionToPerform = possibleActions.get(0);
-            performAction(actionToPerform);
+        
+        if(solve()){
+            
+            System.out.println("Solution found!");
+            this.currentState.displayGrid();
+            memory.getActions().forEach(action -> {
+                System.out.println("Pion " + action.getCellColor() + " en " + action.getPos()[0] + "," + action.getPos()[1] + " avec la direction " + action.getDirection() + " avec " + action.getJumpedCount() + " pion(s) sauté(s)");
+            });
+        } else {
+            System.out.println("No solution exists.");
+            this.currentState.displayGrid();
         }
 
-        System.out.println("Game Over! Final State:");
-        currentState.displayGrid();
+
+    }
+
+    /**
+     * Attempts to solve the game by recursively exploring all possible actions from the current state.
+     * If a final state is reached, the method returns true. If no solution is found, it backtracks and tries other actions.
+     * @return true if a solution is found, false otherwise
+     */
+    public boolean solve(){
+
+            if(currentState.isFinal()) {
+                return true;
+            }
+
+            List<Action> possibleActions = currentState.getPossibleActions();
+
+            for(Action action : possibleActions) {
+                System.out.println("Tente pion "+ action.getCellColor() + " en " + action.getPos()[0] + "," + action.getPos()[1] + "avec la direction"+ action.getDirection() + " avec " + action.getJumpedCount() + " pion(s) sauté(s)");
+                performAction(action);
+                this.currentState.displayGrid();
+
+                if(solve()) {
+                    return true;
+                }
+                System.out.println("Backtrack sur pion "+ action.getCellColor() + " en " + action.getPos()[0] + "," + action.getPos()[1] + "avec la direction"+ action.getDirection() + " avec " + action.getJumpedCount() + " pion(s) sauté(s)");
+                backtrack();
+                this.currentState.displayGrid();
+            }
+            return false;
     }
 
     public State getCurrentState() {
