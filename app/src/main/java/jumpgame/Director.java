@@ -120,18 +120,30 @@ public class Director {
     }
 
 
-    public getPossibleActions() {
-        // Logic to generate possible actions based on the current state
-        // This method should return a list of valid actions that can be performed from the current state
-    
-        
-    }
 
 
 
     public void run() {
-        // Main game loop logic can be implemented here
-        this.currentState.displayGrid();
+
+        while (!currentState.isGameOver()) {
+            // Display the current state of the grid
+            currentState.displayGrid();
+
+            // Get possible actions from the current state
+            List<Action> possibleActions = currentState.getPossibleActions();
+
+            if (possibleActions.isEmpty()) {
+                System.out.println("No more possible actions. Game over!");
+                break;
+            }
+
+            // For demonstration, we will just perform the first possible action
+            Action actionToPerform = possibleActions.get(0);
+            performAction(actionToPerform);
+        }
+
+        System.out.println("Game Over! Final State:");
+        currentState.displayGrid();
     }
 
     public State getCurrentState() {
