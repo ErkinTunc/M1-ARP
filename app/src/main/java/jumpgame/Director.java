@@ -14,6 +14,9 @@ public class Director {
      * @param action The action to be performed, which includes the direction, cell number, position, and color.
      */
     public void performAction(Action action) {
+        int[] pos = action.getPos();
+        currentState.colorCase(action.getCellColor(), pos[0], pos[1]); // 
+
 
         memory.addAction(action);
     }
@@ -42,20 +45,20 @@ public class Director {
 
 
                 case Up:
-                    wrongPosX = pos[0] + lastAction.getCellColor(); 
+                    wrongPosX = pos[0] + lastAction.getJumpedCount()+1; 
                     wrongPosY = pos[1];
                     break;
                 case Down:
-                    wrongPosX = pos[0] - lastAction.getCellColor(); 
+                    wrongPosX = pos[0] - lastAction.getJumpedCount()+1; 
                     wrongPosY = pos[1];
                     break;
                 case Left:
                     wrongPosX = pos[0];
-                    wrongPosY = pos[1] + lastAction.getCellColor(); 
+                    wrongPosY = pos[1] + lastAction.getJumpedCount()+1; 
                     break;
                 case Right:
                     wrongPosX = pos[0];
-                    wrongPosY = pos[1] - lastAction.getCellColor(); 
+                    wrongPosY = pos[1] - lastAction.getJumpedCount()+1; 
                     break;
                 default:
                     throw new IllegalArgumentException("Unknown direction: " + lastAction.getDirection());
@@ -67,6 +70,8 @@ public class Director {
 
 
     }
+
+
 
     
 
