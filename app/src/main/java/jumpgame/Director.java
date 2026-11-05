@@ -16,54 +16,59 @@ public class Director {
     public void performAction(Action action) {
         memory.addAction(action);
         int[] pos = action.getPos();
-        currentState.colorCase(action.getCellColor(), pos[0], pos[1]); 
+        int color = action.getCellColor();
 
-        suppressColorOfJumpedCells(action); 
+
+        currentState.colorCase(0, pos[0], pos[1]); 
 
         
+       int distance = action.getJumpedCount();
 
-
-    }
-
-    /**
-     * Suppresses the color of cells that were jumped over by the given action.
-     * @param action The action for which to suppress colors.
-     */
-    public void suppressColorOfJumpedCells(Action action) {
-        int[] pos = action.getPos();
-        int directionX = 0;
-        int directionY = 0;
+       int stepX =0;
+       int stepY =0;
 
         switch (action.getDirection()) {
             case Up:
-                directionX = -1;
+                stepX = -1;
                 break;
             case Down:
-                directionX = 1;
+                stepX = 1;
                 break;
             case Left:
-                directionY = -1;
+                stepY = -1;
                 break;
             case Right:
-                directionY = 1;
+                stepY = 1;
                 break;
             default:
                 break;
         }
 
         for (int i = 1; i <= action.getJumpedCount(); i++) {
-            int newX = pos[0] + directionX * i;
-            int newY = pos[1] + directionY * i;
+            int newX = pos[0] + stepX * i;
+            int newY = pos[1] + stepY * i;
             currentState.colorCase(0, newX, newY); // Set the jumped cells to empty (0)
         }
+
+        int targetX = pos[0] + stepX * (action.getJumpedCount() + 1);
+        int targetY = pos[1] + stepY * (action.getJumpedCount() + 1);
+        currentState.colorCase(action.getCellColor(), targetX, targetY);
     }
+        
+
+        
+
+
     
+
     /**
      * Reverts the current state to the previous state based on the last action performed.
      */
     public void backtrack() {
  
-        if (!memory.getActions().isEmpty()) {
+        if (memory.getActions().isEmpty()) {
+            return;
+        }
 
             Action lastAction = memory.getActions().remove(memory.getActions().size() - 1);
 
@@ -73,44 +78,69 @@ public class Director {
 
             currentState.colorCase(color, pos[0], pos[1]); // Revert the color of the cell to its previous state
 
-            int wrongPosX ;
-            int wrongPosY ;
-            
+
+            int stepX =0 ;
+            int stepY = 0;
+
             switch (lastAction.getDirection()) {
 
 
                 case Up:
-                    wrongPosX = pos[0] + lastAction.getJumpedCount()+1; 
-                    wrongPosY = pos[1];
+                    stepX = -1;
                     break;
                 case Down:
-                    wrongPosX = pos[0] - lastAction.getJumpedCount()+1; 
-                    wrongPosY = pos[1];
+                    stepX = 1; 
                     break;
                 case Left:
-                    wrongPosX = pos[0];
-                    wrongPosY = pos[1] + lastAction.getJumpedCount()+1; 
+                    stepY = -1;
                     break;
                 case Right:
-                    wrongPosX = pos[0];
-                    wrongPosY = pos[1] - lastAction.getJumpedCount()+1; 
+                    stepY = 1; 
                     break;
                 default:
                     throw new IllegalArgumentException("Unknown direction: " + lastAction.getDirection());
             }
 
-            currentState.colorCase(0, wrongPosX, wrongPosY); // Set the cell to empty (0) after reverting
 
+        
+
+        for(int i = 0; i < lastAction.getJumpedCount(); i++) {
+            
+            int newX = pos[0] + stepX * (i + 1);
+            int newY = pos[1] + stepY * (i + 1);
+            currentState.colorCase(lastAction.getEliminatedColor(), newX, newY); // Restore the eliminated cells to their previous color
         }
-
+        int finalX = pos[0] + stepX * (lastAction.getJumpedCount() + 1);
+        int finalY = pos[1] + stepY * (lastAction.getJumpedCount() + 1);
+        currentState.colorCase(0, finalX, finalY);
 
     }
 
 
 
+
+
     public void run() {
-        // Main game loop logic can be implemented here
-        this.currentState.displayGrid();
+
+        while (!currentState.isFinal()) {
+            // Display the current state of the grid
+            currentState.displayGrid();
+
+            // Get possible actions from the current state
+            List<Action> possibleActions = currentState.getPossibleActions();
+
+            if (possibleActions.isEmpty() ) {
+                System.out.println("No more possible actions. Game over!");
+                break;
+            }
+
+            // For demonstration, we will just perform the first possible action
+            Action actionToPerform = possibleActions.get(0);
+            performAction(actionToPerform);
+        }
+
+        System.out.println("Game Over! Final State:");
+        currentState.displayGrid();
     }
 
     public State getCurrentState() {

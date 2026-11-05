@@ -34,7 +34,9 @@ public class Action {
     // --------------- Methods ------------------
 
     public boolean isValid() {
+        
         return direction != null;
+
     }
 
     // ----------- Getters----------------
