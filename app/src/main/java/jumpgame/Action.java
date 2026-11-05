@@ -17,12 +17,14 @@ public class Action {
 
     // -------------- Construter ---------------
 
-    public Action(Direction direction, int cellColor, int initialPosX, int initialPosY, int eliminatedColor,
-            int jumpedCount)
+    public Action(
+            Direction direction, int cellColor, int initialPosX,
+            int initialPosY, int eliminatedColor, int jumpedCount)
             throws IllegalArgumentException {
-        if (direction == null) {
-            throw new IllegalArgumentException("Direction cannot be null");
-        }
+
+        validate(direction, cellColor, initialPosX, initialPosY,
+                eliminatedColor, jumpedCount);
+
         this.direction = direction;
         this.cellColor = cellColor;
         this.initialPosX = initialPosX;
@@ -34,9 +36,36 @@ public class Action {
     // --------------- Methods ------------------
 
     public boolean isValid() {
-        
         return direction != null;
+    }
 
+    private static void validate(
+            Direction direction, int cellColor,
+            int posX, int posY,
+            int eliminatedColor, int jumpedCount) {
+
+        if (direction == null) {
+            throw new IllegalArgumentException("Direction cannot be null");
+        }
+
+        if (cellColor <= 0 || eliminatedColor <= 0) {
+            throw new IllegalArgumentException("Colors must be positive");
+        }
+
+        if (cellColor == eliminatedColor) {
+            throw new IllegalArgumentException(
+                    "Cannot jump over a token of the same color");
+        }
+
+        if (jumpedCount <= 0) {
+            throw new IllegalArgumentException(
+                    "Jumped count must be positive");
+        }
+
+        if (posX < 0 || posY < 0) {
+            throw new IllegalArgumentException(
+                    "Starting coordinates cannot be negative");
+        }
     }
 
     // ----------- Getters----------------
