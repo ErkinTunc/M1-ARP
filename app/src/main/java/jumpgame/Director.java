@@ -24,8 +24,8 @@ public class Director {
         
        int distance = action.getJumpedCount();
 
-       int stepX;
-       int stepY;
+       int stepX =0;
+       int stepY =0;
 
         switch (action.getDirection()) {
             case Up:
@@ -66,7 +66,9 @@ public class Director {
      */
     public void backtrack() {
  
-        if (!memory.getActions().isEmpty()) {
+        if (memory.getActions().isEmpty()) {
+            return;
+        }
 
             Action lastAction = memory.getActions().remove(memory.getActions().size() - 1);
 
@@ -79,24 +81,23 @@ public class Director {
             int wrongPosX ;
             int wrongPosY ;
             
+            int stepX =0 ;
+            int stepY = 0;
+
             switch (lastAction.getDirection()) {
 
 
                 case Up:
-                    wrongPosX = pos[0] + lastAction.getJumpedCount()+1; 
-                    wrongPosY = pos[1];
+                    stepX = 1;
                     break;
                 case Down:
-                    wrongPosX = pos[0] - lastAction.getJumpedCount()+1; 
-                    wrongPosY = pos[1];
+                    stepX = -1; 
                     break;
                 case Left:
-                    wrongPosX = pos[0];
-                    wrongPosY = pos[1] + lastAction.getJumpedCount()+1; 
+                    stepY = 1;
                     break;
                 case Right:
-                    wrongPosX = pos[0];
-                    wrongPosY = pos[1] - lastAction.getJumpedCount()+1; 
+                    stepY = -1; 
                     break;
                 default:
                     throw new IllegalArgumentException("Unknown direction: " + lastAction.getDirection());
@@ -104,9 +105,26 @@ public class Director {
 
             currentState.colorCase(0, wrongPosX, wrongPosY); // Set the cell to empty (0) after reverting
 
+        
+
+        for(int i = 0; i < lastAction.getJumpedCount(); i++) {
+            
+            int newX = pos[0] + stepX * (i + 1);
+            int newY = pos[1] + stepY * (i + 1);
+            currentState.colorCase(lastAction.getEliminatedColor(), newX, newY); // Restore the eliminated cells to their previous color
         }
+        int finalX = pos[0] + stepX * (lastAction.getJumpedCount() + 1);
+        int finalY = pos[1] + stepY * (lastAction.getJumpedCount() + 1);
+        currentState.colorCase(0, finalX, finalY);
+
+    }
 
 
+    public getPossibleActions() {
+        // Logic to generate possible actions based on the current state
+        // This method should return a list of valid actions that can be performed from the current state
+    
+        
     }
 
 

@@ -50,4 +50,12 @@ public class State {
             System.out.println();
         }
     }
+
+    public int getRowCount() {
+        return grid.length;
+    }
+
+    public int getColumnCount() {
+        return grid[0].length;
+    }
 }
