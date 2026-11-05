@@ -1,5 +1,4 @@
 package jumpgame;
-import java.awt.Desktop.Action;
 import java.util.List;
 /**
  * This class represents a state of the grid in the game. 
@@ -99,7 +98,7 @@ public class State {
                             break;
                         }
 
-                        if(cellColor == currentColor){
+                        if(color == currentColor){
                             break; // Stop if we encounter a cell of the same color
                         }
 
