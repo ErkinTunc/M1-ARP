@@ -34,7 +34,7 @@ java {
 
 application {
     // Define the main class for the application.
-    mainClass = "jumpgame.app.Main"
+    mainClass = "app.Main"
 }
 
 tasks.named<Test>("test") {
