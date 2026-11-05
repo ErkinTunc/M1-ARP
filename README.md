@@ -4,10 +4,10 @@
 
 Run with the run task, which assembles and executes the application
 
-1. > ./gradlew run
+1. > .\gradlew.bat --console=plain -q run
 
    Runs the application
-   - > ./gradlew run --args="simple"
+
 
 Builds the project and runs the tests
 

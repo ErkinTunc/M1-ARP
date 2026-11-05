@@ -34,10 +34,14 @@ java {
 
 application {
     // Define the main class for the application.
-    mainClass = "jumpgame.app.Main"
+    mainClass = "app.Main"
 }
 
 tasks.named<Test>("test") {
     // Use JUnit Platform for unit tests.
     useJUnitPlatform()
+}
+
+tasks.named<JavaExec>("run") {
+    standardInput = System.`in`
 }
