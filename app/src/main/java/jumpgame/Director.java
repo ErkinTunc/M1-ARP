@@ -1,14 +1,29 @@
 package jumpgame;
 import java.util.List;
 
+
+/**
+ * Director
+ * The Director class is responsible for managing the game state and the sequence of actions performed on it. 
+ * It maintains the current state of the grid and a memory of all actions taken. 
+ * The class provides methods to perform actions, backtrack to previous states, and run the game to find a solution.
+ */
 public class Director {
     private final State currentState;
     private final MemoryOfActions memory;
 
+    // -------------- Constructor ----------------
+
+    /**
+     * Constructs a Director with the given initial state
+     */
     public Director(State initialState) {
         this.currentState = initialState;
         this.memory = new MemoryOfActions();
     }
+
+
+    // --------------- Methods ------------------
 
     /**
      * Performs an action on the current state and records it in memory.
@@ -20,6 +35,7 @@ public class Director {
         int color = action.getCellColor();
 
 
+    
         currentState.colorCase(0, pos[0], pos[1]); 
 
         
@@ -168,6 +184,10 @@ public class Director {
             }
             return false;
     }
+
+
+
+    // ----------- Getters----------------
 
     public State getCurrentState() {
         return currentState;

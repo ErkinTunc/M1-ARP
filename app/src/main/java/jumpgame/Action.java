@@ -39,6 +39,16 @@ public class Action {
         return direction != null;
     }
 
+    /**
+     * Validates the parameters of the action to ensure they meet the required conditions.
+     * Throws IllegalArgumentException if any of the conditions are not met.
+     * @param direction 
+     * @param cellColor
+     * @param posX
+     * @param posY
+     * @param eliminatedColor
+     * @param jumpedCount 
+     */
     private static void validate(
             Direction direction, int cellColor,
             int posX, int posY,
