@@ -16,48 +16,51 @@ public class Director {
     public void performAction(Action action) {
         memory.addAction(action);
         int[] pos = action.getPos();
-        currentState.colorCase(action.getCellColor(), pos[0], pos[1]); 
+        int color = action.getCellColor();
 
-        suppressColorOfJumpedCells(action); 
+
+        currentState.colorCase(0, pos[0], pos[1]); 
 
         
+       int distance = action.getJumpedCount();
 
-
-    }
-
-    /**
-     * Suppresses the color of cells that were jumped over by the given action.
-     * @param action The action for which to suppress colors.
-     */
-    public void suppressColorOfJumpedCells(Action action) {
-        int[] pos = action.getPos();
-        int directionX = 0;
-        int directionY = 0;
+       int stepX;
+       int stepY;
 
         switch (action.getDirection()) {
             case Up:
-                directionX = -1;
+                stepX = -1;
                 break;
             case Down:
-                directionX = 1;
+                stepX = 1;
                 break;
             case Left:
-                directionY = -1;
+                stepY = -1;
                 break;
             case Right:
-                directionY = 1;
+                stepY = 1;
                 break;
             default:
                 break;
         }
 
         for (int i = 1; i <= action.getJumpedCount(); i++) {
-            int newX = pos[0] + directionX * i;
-            int newY = pos[1] + directionY * i;
+            int newX = pos[0] + stepX * i;
+            int newY = pos[1] + stepY * i;
             currentState.colorCase(0, newX, newY); // Set the jumped cells to empty (0)
         }
+
+        int targetX = pos[0] + stepX * (action.getJumpedCount() + 1);
+        int targetY = pos[1] + stepY * (action.getJumpedCount() + 1);
+        currentState.colorCase(action.getCellColor(), targetX, targetY);
     }
+        
+
+        
+
+
     
+
     /**
      * Reverts the current state to the previous state based on the last action performed.
      */
