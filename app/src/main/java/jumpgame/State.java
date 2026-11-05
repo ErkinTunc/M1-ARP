@@ -8,13 +8,21 @@ import java.util.List;
  */
 public class State {
 
+    // ---------------- Attributes ----------------
     private final int [][] grid;
 
 
+
+    // -------------- Constructor ----------------
     public State(int [][] grid) {
         this.grid = grid;
     }
 
+
+
+
+
+    // --------------- Methods ------------------
 
     /**
      * Checks if the state is final, meaning that there is only one non-zero element in the grid.
@@ -34,14 +42,36 @@ public class State {
         return count == 1;
     }
 
+
+
+
+    /**
+     * Colors a specific cell in the grid with the given color.
+     * @param color the color to set the cell to
+     * @param posX the x-coordinate of the cell
+     * @param posY the y-coordinate of the cell
+     */
     public void colorCase(int color, int posX, int posY) {
         grid[posX][posY] = color;
     }
 
+
+    /**
+     * Returns the color of the cell at the specified coordinates.
+     * @param x  the x-coordinate of the cell
+     * @param y  the y-coordinate of the cell
+     * @return the color of the cell at (x, y)
+     */
     public int getCellColor(int x, int y){
         return grid[x][y];
     }
 
+
+
+    /**
+     * Displays the current state of the grid to the console.
+     * Each row of the grid is printed on a new line, with cell values separated by spaces.
+     */
     public void displayGrid() {
         for (int[] grid1 : grid) {
             for (int j = 0; j < grid1.length; j++) {
@@ -52,6 +82,14 @@ public class State {
     }
 
 
+
+
+    /**
+     * Returns a list of all possible actions that can be performed from the current state.
+     * An action is possible if a cell can jump over one or more adjacent cells of a different color and land on an empty cell.
+     * The method iterates through each cell in the grid, checking in all four directions (up, down, left, right) for possible jumps.
+     * @return a list of possible actions from the current state
+     */
     public List<Action> getPossibleActions(){
 
         List<Action> possibleActions = new java.util.ArrayList<>();
@@ -76,7 +114,7 @@ public class State {
                         case Right -> stepY = 1;
                     }
 
-                    
+
                     int currentX = x+stepX;
                     int currentY = y+stepY;
                     int jumpedCount = 0;
@@ -117,10 +155,21 @@ public class State {
     }
 
     
+    // ---------------- Getters ----------------
+
+    /**
+     * Returns the number of rows in the grid.
+     * @return the number of rows
+     */
     public int getRowCount() {
         return grid.length;
     }
 
+
+    /**
+     * Returns the number of columns in the grid.
+     * @return the number of columns
+     */
     public int getColumnCount() {
         return grid[0].length;
     }

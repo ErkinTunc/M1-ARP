@@ -139,7 +139,6 @@ public class Director {
             this.currentState.displayGrid();
         }
 
-
     }
 
     /**
