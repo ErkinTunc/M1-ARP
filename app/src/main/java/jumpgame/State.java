@@ -1,4 +1,5 @@
 package jumpgame;
+import java.awt.Desktop.Action;
 import java.util.List;
 /**
  * This class represents a state of the grid in the game. 
@@ -56,50 +57,73 @@ public class State {
 
         List<Action> possibleActions = new java.util.ArrayList<>();
 
-        for(int i = 0; i < grid.length; i++) {
+        int rows = grid.length;
+        int cols = grid[0].length;
 
-            for(int j = 0; j < grid[i].length; j++) {
+        for(int x = 0; x < rows; x++) {
+            for(int y = 0; y < cols; y++) {
+                int color = grid[x][y];
 
-                if(grid[i][j] != 0) { // If the cell is not empty
+                if(color==0) {
+                    continue; // Skip empty cells
+                }
+                for(Direction direction : Direction.values()) {
+                    int stepX = 0;
+                    int stepY = 0;
+                    switch(direction) {
+                        case Up:
+                            stepX = -1;
+                            break;
+                        case Down:
+                            stepX = 1; 
+                            break;
+                        case Left:
+                            stepY = -1;
+                            break;
+                        case Right:
+                            stepY = 1; 
+                            break;
+                    }
+                    int currentX = x+stepX;
+                    int currentY = y+stepY;
+                    int jumpedCount = 0;
+                    int eliminatedColor = -1; // Initialize to an invalid color
 
-                    for(Direction direction : Direction.values()) {
-                        
-                        int[] actualPos = new int[]{i, j};
-                        int jumpedCount = 0;
-                        int nextX = actualPos[0];
-                        int nextY = actualPos[1];
+                    while(currentX>= 0 && currentX<rows && currentY>= 0 && currentY<cols) {
+                        int currentColor = grid[currentX][currentY];
 
-                        // Check if the next position in the given direction is valid for a jump(i.e., there is a non-zero cell to jump over and an empty cell to land on and the jump is within the grid boundaries)
-                        if(direction == Direction.Up && nextX - 2 >= 0 && grid[nextX - 1][nextY] != 0 && grid[nextX - 2][nextY] == 0) {
-                            nextX -= 2;
-
-                        } else if(direction == Direction.Down && nextX + 2 < grid.length && grid[nextX + 1][nextY] != 0 && grid[nextX + 2][nextY] == 0) {
-                            nextX += 2;
-                        } else if(direction == Direction.Left && nextY - 2 >= 0 && grid[nextX][nextY - 1] != 0 && grid[nextX][nextY - 2] == 0   ) {
-                            nextY -= 2;
-                        } else if(direction == Direction.Right && nextY + 2 < grid[0].length && grid[nextX][nextY + 1] != 0 && grid[nextX][nextY + 2] == 0) {
-                            nextY += 2;
+                        if(currentColor == 0){
+                            if(jumpedCount > 0){
+                                possibleActions.add(new Action(direction,color,x,y,eliminatedColor,jumpedCount));
+                            }
+                            break;
                         }
 
-                        if(nextX != actualPos[0] || nextY != actualPos[1]) {
-                            jumpedCount++;
-
-                            int eliminatedColor = grid[(actualPos[0] + nextX) / 2][(actualPos[1] + nextY) / 2];
-
-                            possibleActions.add(new Action(direction, grid[i][j], i, j, eliminatedColor, jumpedCount));
-
+                        if(cellColor == currentColor){
+                            break; // Stop if we encounter a cell of the same color
                         }
 
-                      
+                        if(jumpedCount == 0){
+                            eliminatedColor = currentColor; // Set the eliminated color on the first jump
+                        } else if(eliminatedColor != currentColor){
+                            break; // Stop if we encounter a different color after the first jump
+                        }
+
+                        jumpedCount++;
+                        currentX += stepX;
+                        currentY += stepY;
+
                     }
                 }
             }
         }
+        return possibleActions ;
 
-        return possibleActions;
         
 
     }
+
+    
     public int getRowCount() {
         return grid.length;
     }

@@ -78,9 +78,7 @@ public class Director {
 
             currentState.colorCase(color, pos[0], pos[1]); // Revert the color of the cell to its previous state
 
-            int wrongPosX ;
-            int wrongPosY ;
-            
+
             int stepX =0 ;
             int stepY = 0;
 
@@ -88,22 +86,21 @@ public class Director {
 
 
                 case Up:
-                    stepX = 1;
+                    stepX = -1;
                     break;
                 case Down:
-                    stepX = -1; 
+                    stepX = 1; 
                     break;
                 case Left:
-                    stepY = 1;
+                    stepY = -1;
                     break;
                 case Right:
-                    stepY = -1; 
+                    stepY = 1; 
                     break;
                 default:
                     throw new IllegalArgumentException("Unknown direction: " + lastAction.getDirection());
             }
 
-            currentState.colorCase(0, wrongPosX, wrongPosY); // Set the cell to empty (0) after reverting
 
         
 
@@ -125,14 +122,14 @@ public class Director {
 
     public void run() {
 
-        while (!currentState.isGameOver()) {
+        while (!currentState.isFinal()) {
             // Display the current state of the grid
             currentState.displayGrid();
 
             // Get possible actions from the current state
             List<Action> possibleActions = currentState.getPossibleActions();
 
-            if (possibleActions.isEmpty()) {
+            if (possibleActions.isEmpty() ) {
                 System.out.println("No more possible actions. Game over!");
                 break;
             }
