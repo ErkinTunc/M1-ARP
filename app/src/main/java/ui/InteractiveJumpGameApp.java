@@ -13,8 +13,6 @@ import java.util.Random;
 
 /** Console navigation only; the domain classes decide which moves are legal. */
 public final class InteractiveJumpGameApp {
-    private static final int MOVES_PER_PAGE = 8;
-
     private final BufferedReader input;
     private final ConsoleReporter output;
     private final RandomBoardFactory boards;
@@ -141,18 +139,16 @@ public final class InteractiveJumpGameApp {
             } else {
                 output.info("Loaded preset: " + currentPreset.label());
             }
-            output.option("1", "Show legal moves");
-            output.option("2", "Perform a legal move");
-            output.option("3", "Undo last move");
+            output.option("1", "Choose and play a legal move");
+            output.option("2", "Undo last move");
             output.info("Backtracking solver not connected yet.");
             output.option("0", "Main menu");
 
             String choice = read("Select option: ");
             if (choice == null || choice.equals("0")) return;
             switch (choice.toUpperCase()) {
-                case "1" -> showMoves(false);
-                case "2" -> showMoves(true);
-                case "3" -> {
+                case "1" -> showMoves();
+                case "2" -> {
                     if (session.undo()) notice = "Last move undone.";
                     else { output.error("Nothing to undo."); pause(); }
                 }
@@ -166,53 +162,44 @@ public final class InteractiveJumpGameApp {
                     }
                 }
                 default -> {
-                    output.error("Choose 0, 1, 2, 3" + ("RANDOM".equals(mode) ? " or R" : "") + ".");
+                    output.error("Choose 0, 1, 2" + ("RANDOM".equals(mode) ? " or R" : "") + ".");
                     pause();
                 }
             }
         }
     }
 
-    /** Numbered moves are paginated so 10x10 boards never flood the terminal. */
-    private void showMoves(boolean selectMove) throws IOException {
+    /** List every legal move with a stable number. Selecting a number plays the move. */
+    private void showMoves() throws IOException {
         List<Action> moves = session.availableActions();
-        int page = 0;
+        String inputError = null;
         while (true) {
-            showScreen(selectMove ? "PERFORM A MOVE" : "LEGAL MOVES");
+            showScreen("LEGAL MOVES");
             output.board(session.snapshot());
             if (moves.isEmpty()) {
                 output.info("No legal moves in this position.");
                 pause();
                 return;
             }
-            int pageCount = (moves.size() + MOVES_PER_PAGE - 1) / MOVES_PER_PAGE;
-            int first = page * MOVES_PER_PAGE;
-            int last = Math.min(first + MOVES_PER_PAGE, moves.size());
-            output.info("Legal moves: " + moves.size() + "   |   Page: " + (page + 1) + "/" + pageCount);
-            for (int i = first; i < last; i++) {
-                output.option(Integer.toString(i - first + 1), describeMove(moves.get(i)));
+
+            output.info("Available moves: " + moves.size());
+            for (int i = 0; i < moves.size(); i++) {
+                output.option(Integer.toString(i + 1), describeMove(moves.get(i)));
             }
-            if (page > 0) output.option("P", "Previous page");
-            if (page + 1 < pageCount) output.option("N", "Next page");
             output.option("0", "Back to board");
-            String response = read(selectMove ? "Choose a move from this page: " : "N/P: Navigate | ENTER: Back: ");
-            if (response == null || response.equals("0") || response.isBlank()) return;
-            if (response.equalsIgnoreCase("N") && page + 1 < pageCount) { page++; continue; }
-            if (response.equalsIgnoreCase("P") && page > 0) { page--; continue; }
-            if (selectMove) {
-                try {
-                    int localIndex = Integer.parseInt(response) - 1;
-                    int index = first + localIndex;
-                    if (localIndex < 0 || index >= last) throw new NumberFormatException();
-                    Action selected = session.performMove(index);
-                    notice = "Move performed: " + describeMove(selected);
-                    return;
-                } catch (NumberFormatException e) {
-                    // Invalid input must not mutate the game state.
-                }
+            if (inputError != null) output.error(inputError);
+
+            String response = read("Select a move (0-" + moves.size() + "): ");
+            if (response == null || response.equals("0")) return;
+            try {
+                int selectedIndex = Integer.parseInt(response) - 1;
+                Action selected = session.performMove(selectedIndex);
+                notice = "Move performed: " + describeMove(selected);
+                return;
+            } catch (IllegalArgumentException e) {
+                // No game state change: keep the error visible on the next redraw.
+                inputError = "Choose a number between 0 and " + moves.size() + ".";
             }
-            output.error(selectMove ? "Choose a listed move, N, P or 0." : "Choose N, P or 0.");
-            pause();
         }
     }
 
