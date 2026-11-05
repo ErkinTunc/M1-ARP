@@ -42,15 +42,11 @@ public final class InteractiveJumpGameApp {
     public void run() {
         try {
             while (true) {
-                showScreen("MAIN MENU");
-                output.option("1", "Choose preset board");
-                output.option("2", "Generate random board");
-                output.option("3", "Play current board");
-                output.option("4", "Rules");
-                output.option("5", "Options");
-                output.option("0", "Exit");
+                showMainMenu();
                 String choice = read("Select option: ");
-                if (choice == null || choice.equals("0")) return;
+                if (choice == null || choice.equals("0")) {
+                    return;
+                }
                 switch (choice) {
                     case "1" -> choosePreset();
                     case "2" -> createRandomBoard();
@@ -65,6 +61,16 @@ public final class InteractiveJumpGameApp {
         }
     }
 
+    private void showMainMenu() {
+        showScreen("MAIN MENU");
+        output.option("1", "Choose preset board");
+        output.option("2", "Generate random board");
+        output.option("3", "Play current board");
+        output.option("4", "Rules");
+        output.option("5", "Options");
+        output.option("0", "Exit");
+    }
+
     private void choosePreset() throws IOException {
         DemoBoards.Preset[] presets = DemoBoards.Preset.values();
         while (true) {
@@ -75,20 +81,26 @@ public final class InteractiveJumpGameApp {
             }
             output.option("0", "Back to main menu");
             String choice = read("Choose a board: ");
-            if (choice == null || choice.equals("0")) return;
+            if (choice == null || choice.equals("0")) {
+                return;
+            }
+
             try {
                 int index = Integer.parseInt(choice) - 1;
-                if (index < 0 || index >= presets.length) throw new NumberFormatException();
-                currentPreset = presets[index];
-                activeColors = currentPreset.colorCount();
-                mode = "PRESET";
-                loadBoard(currentPreset.board());
-                showBoard();
-                return;
-            } catch (NumberFormatException e) {
-                output.error("Choose a listed board number.");
-                pause();
+                if (index >= 0 && index < presets.length) {
+                    currentPreset = presets[index];
+                    activeColors = currentPreset.colorCount();
+                    mode = "PRESET";
+                    loadBoard(currentPreset.board());
+                    showBoard();
+                    return;
+                }
+            } catch (NumberFormatException ignored) {
+                // Show the same message for invalid numbers and text.
             }
+
+            output.error("Choose a listed board number.");
+            pause();
         }
     }
 
@@ -118,8 +130,8 @@ public final class InteractiveJumpGameApp {
     private void showBoard() throws IOException {
         while (true) {
             showScreen("CURRENT BOARD");
-            output.board(session.snapshot());
             int[][] board = session.snapshot();
+            output.board(board);
             int tokens = session.tokenCount();
             output.info("Tokens: " + tokens
                     + "   |   Empty: " + (board.length * board[0].length - tokens)
@@ -145,22 +157,13 @@ public final class InteractiveJumpGameApp {
             output.option("0", "Main menu");
 
             String choice = read("Select option: ");
-            if (choice == null || choice.equals("0")) return;
-            switch (choice.toUpperCase()) {
+            if (choice == null || choice.equals("0")) {
+                return;
+            }
+            switch (choice.toUpperCase(Locale.ROOT)) {
                 case "1" -> showMoves();
-                case "2" -> {
-                    if (session.undo()) notice = "Last move undone.";
-                    else { output.error("Nothing to undo."); pause(); }
-                }
-                case "R" -> {
-                    if ("RANDOM".equals(mode)) {
-                        loadBoard(boards.generate(board.length, board[0].length, activeColors));
-                        notice = "New random board generated. History reset.";
-                    } else {
-                        output.error("Regenerate is available only for random boards.");
-                        pause();
-                    }
-                }
+                case "2" -> undoLastMove();
+                case "R" -> regenerateBoard(board);
                 default -> {
                     output.error("Choose 0, 1, 2" + ("RANDOM".equals(mode) ? " or R" : "") + ".");
                     pause();
@@ -169,7 +172,27 @@ public final class InteractiveJumpGameApp {
         }
     }
 
-    /** List every legal move with a stable number. Selecting a number plays the move. */
+    private void undoLastMove() throws IOException {
+        if (session.undo()) {
+            notice = "Last move undone.";
+        } else {
+            output.error("Nothing to undo.");
+            pause();
+        }
+    }
+
+    private void regenerateBoard(int[][] board) throws IOException {
+        if (!"RANDOM".equals(mode)) {
+            output.error("Regenerate is available only for random boards.");
+            pause();
+            return;
+        }
+
+        loadBoard(boards.generate(board.length, board[0].length, activeColors));
+        notice = "New random board generated. History reset.";
+    }
+
+    /** Shows every legal move, then applies the selected move. */
     private void showMoves() throws IOException {
         List<Action> moves = session.availableActions();
         String inputError = null;
@@ -190,7 +213,9 @@ public final class InteractiveJumpGameApp {
             if (inputError != null) output.error(inputError);
 
             String response = read("Select a move (0-" + moves.size() + "): ");
-            if (response == null || response.equals("0")) return;
+            if (response == null || response.equals("0")) {
+                return;
+            }
             try {
                 int selectedIndex = Integer.parseInt(response) - 1;
                 Action selected = session.performMove(selectedIndex);
@@ -236,9 +261,15 @@ public final class InteractiveJumpGameApp {
             output.option("1", "ANSI colors: " + (output.colorsEnabled() ? "ON" : "OFF"));
             output.option("0", "Back to main menu");
             String choice = read("Select option: ");
-            if (choice == null || choice.equals("0")) return;
-            if (choice.equals("1")) output.setColorsEnabled(!output.colorsEnabled());
-            else { output.error("Select 0 or 1."); pause(); }
+            if (choice == null || choice.equals("0")) {
+                return;
+            }
+            if (choice.equals("1")) {
+                output.setColorsEnabled(!output.colorsEnabled());
+            } else {
+                output.error("Select 0 or 1.");
+                pause();
+            }
         }
     }
 
@@ -256,7 +287,9 @@ public final class InteractiveJumpGameApp {
             String raw = requireInput(label);
             try {
                 int value = Integer.parseInt(raw);
-                if (value >= min && value <= max) return value;
+                if (value >= min && value <= max) {
+                    return value;
+                }
             } catch (NumberFormatException ignored) {
                 // Invalid user input should retry without crashing.
             }
@@ -266,7 +299,9 @@ public final class InteractiveJumpGameApp {
 
     private String requireInput(String label) throws IOException {
         String value = read(label);
-        if (value == null) throw new IOException("Input stream closed");
+        if (value == null) {
+            throw new IOException("Input stream closed");
+        }
         return value;
     }
 
@@ -276,7 +311,9 @@ public final class InteractiveJumpGameApp {
         return value == null ? null : value.trim();
     }
 
-    private void pause() throws IOException { read("Press ENTER to return... "); }
+    private void pause() throws IOException {
+        read("Press ENTER to return... ");
+    }
 
     private void showScreen(String title) {
         int[][] board = session.snapshot();

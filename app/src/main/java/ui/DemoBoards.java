@@ -1,10 +1,12 @@
 package ui;
 
-import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
-/** Carefully chosen fixtures; no UI or solving logic belongs here. */
+/** Predefined boards used by the menu and tests. */
 public final class DemoBoards {
-    private DemoBoards() { }
+    private DemoBoards() {
+    }
 
     public enum Preset {
         STARTER("STARTER", "3x3 - one-move solution", new int[][] {
@@ -53,8 +55,15 @@ public final class DemoBoards {
         }
 
         public int colorCount() {
-            return (int) Arrays.stream(template).flatMapToInt(Arrays::stream)
-                    .filter(value -> value != 0).distinct().count();
+            Set<Integer> colors = new HashSet<>();
+            for (int[] row : template) {
+                for (int cell : row) {
+                    if (cell != 0) {
+                        colors.add(cell);
+                    }
+                }
+            }
+            return colors.size();
         }
     }
 
@@ -62,7 +71,11 @@ public final class DemoBoards {
         return Preset.STANDARD.board();
     }
 
-    private static int[][] deepCopy(int[][] original) {
-        return Arrays.stream(original).map(int[]::clone).toArray(int[][]::new);
+    private static int[][] deepCopy(int[][] board) {
+        int[][] copy = new int[board.length][];
+        for (int row = 0; row < board.length; row++) {
+            copy[row] = board[row].clone();
+        }
+        return copy;
     }
 }

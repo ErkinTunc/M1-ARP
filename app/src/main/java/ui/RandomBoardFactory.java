@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 
-/** Creates demonstration boards. Does not claim they are solvable. */
+/** Generates random boards without guaranteeing they can be solved. */
 public final class RandomBoardFactory {
     private final Random random;
 
@@ -18,17 +18,17 @@ public final class RandomBoardFactory {
         if (rows < 2 || rows > 10 || columns < 2 || columns > 10) {
             throw new IllegalArgumentException("Board dimensions must be between 2 and 10.");
         }
+
         int cellCount = rows * columns;
         if (colorCount < 2 || colorCount > 6 || colorCount >= cellCount) {
             throw new IllegalArgumentException("Colors must be between 2 and min(6, cells - 1).");
         }
 
-        // Keep at least one empty space and guarantee that every selected color appears.
-        int targetEmpty = Math.max(1, cellCount / 3);
-        int emptyCount = Math.min(targetEmpty, cellCount - colorCount);
+        // Leave empty cells and include each selected color at least once.
+        int emptyCount = Math.min(Math.max(1, cellCount / 3), cellCount - colorCount);
         int tokenCount = cellCount - emptyCount;
-
         List<Integer> cells = new ArrayList<>(cellCount);
+
         for (int color = 1; color <= colorCount; color++) {
             cells.add(color);
         }
@@ -38,12 +38,13 @@ public final class RandomBoardFactory {
         while (cells.size() < cellCount) {
             cells.add(0);
         }
+
         Collections.shuffle(cells, random);
 
-        int[][] result = new int[rows][columns];
-        for (int position = 0; position < cellCount; position++) {
-            result[position / columns][position % columns] = cells.get(position);
+        int[][] board = new int[rows][columns];
+        for (int index = 0; index < cellCount; index++) {
+            board[index / columns][index % columns] = cells.get(index);
         }
-        return result;
+        return board;
     }
 }
